@@ -48,7 +48,6 @@ resource "azurerm_virtual_machine" "ad-primary-dc-pip-vm" {
   storage_os_disk {
     name = "ad-primary-dc-osdisk"
 
-    #vhd_uri           = "${azurerm_storage_account.jenkins_storage.primary_blob_endpoint}${azurerm_storage_container.jenkins_cont.name}/osdisk-1.vhd"
     caching           = "ReadWrite"
     managed_disk_type = "Standard_LRS"
     create_option     = "FromImage"
@@ -65,7 +64,7 @@ resource "azurerm_virtual_machine" "ad-primary-dc-pip-vm" {
   }
 }
 
-/*
+
 #Configure PDC
 resource "azurerm_virtual_machine_extension" "create_ad_forest_extension" {
   name                = "${format("%s-CreateADForest", var.config["pdc_vm_name"])}"
@@ -91,7 +90,8 @@ resource "azurerm_virtual_machine_extension" "create_ad_forest_extension" {
       }
 		}
   SETTINGS
-
+  
+  /*
   protected_settings = <<SETTINGS
     {
       "Items": {
@@ -116,4 +116,3 @@ resource "azurerm_virtual_network" "adha_vnet_with_dns" {
   }
 }
 */
-

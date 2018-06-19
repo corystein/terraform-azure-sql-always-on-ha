@@ -48,7 +48,6 @@ resource "azurerm_virtual_machine" "ad-secondary-dcpip-vm" {
   storage_os_disk {
     name = "ad-secondary-dcosdisk"
 
-    #vhd_uri           = "${azurerm_storage_account.jenkins_storage.primary_blob_endpoint}${azurerm_storage_container.jenkins_cont.name}/osdisk-1.vhd"
     caching           = "ReadWrite"
     managed_disk_type = "Standard_LRS"
     create_option     = "FromImage"
