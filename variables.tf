@@ -38,6 +38,15 @@ variable "config" {
     "avail_set1_name" = "adavailabilityset"
     "avail_set2_name" = "sqlavailabilityset"
 
+    # AD Setup Scripts
+    "asset_location"            = "https://demotest001.blob.core.windows.net/activedirectory"
+    "create_pdc_script_path"    = "/CreateADPDC.zip"
+    "prepare_bdc_script_path"   = "/PrepareADBDC.zip"
+    "configure_bdc_script_path" = "/ConfigureADBDC.zip"
+    "ad_pdc_config_function"    = "CreateADPDC.ps1"
+    "ad_bdc_prepare_function"   = "PrepareADBDC.ps1"
+    "ad_bdc_config_function"    = "ConfigureADBDC.ps1"
+
     /*
     # Virtual Machine settings
     "jenkins_master_primary_vmname"       = "TESTJENMSTVM001"

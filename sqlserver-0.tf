@@ -59,8 +59,9 @@ resource "azurerm_virtual_machine" "sqlserver-0-vm" {
     admin_username = "DomainAdmin"
     admin_password = "Contoso!0000"
   }
-  os_profile_linux_config {
-    disable_password_authentication = false
+  os_profile_windows_config {
+    provision_vm_agent        = true
+    enable_automatic_upgrades = false
   }
 }
 

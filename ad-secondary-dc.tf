@@ -59,27 +59,86 @@ resource "azurerm_virtual_machine" "ad-secondary-dcpip-vm" {
     admin_username = "DomainAdmin"
     admin_password = "Contoso!0000"
   }
-  os_profile_linux_config {
-    disable_password_authentication = false
+  os_profile_windows_config {
+    provision_vm_agent        = true
+    enable_automatic_upgrades = false
   }
 }
 
 /*
-resource "azurerm_virtual_machine_extension" "jenkins_master_primary_extension" {
-  name                 = "jenkins_master_primary_extension"
-  location             = "${azurerm_resource_group.res_group.location}"
-  resource_group_name  = "${azurerm_resource_group.res_group.name}"
-  virtual_machine_name = "${azurerm_virtual_machine.jenkins_master_primary_vm.name}"
-  publisher            = "Microsoft.OSTCExtensions"
-  type                 = "CustomScriptForLinux"
-  type_handler_version = "1.2"
+#Prepare BDC
+resource "azurerm_virtual_machine_extension" "prepare_bdc_extension" {
+  name                = "${format("%s-PrepareBDC", var.config["bdc_vm_name"])}"
+  resource_group_name = "${azurerm_resource_group.quickstartad.name}"
+  location            = "${azurerm_resource_group.quickstartad.location}"
+
+  virtual_machine_name       = "${azurerm_virtual_machine.bdc_virtual_machine.name}"
+  publisher                  = "Microsoft.Powershell"
+  type                       = "DSC"
+  type_handler_version       = "2.21"
+  auto_upgrade_minor_version = "true"
 
   settings = <<SETTINGS
-  {
-          "fileUris": ["https://raw.githubusercontent.com/corystein/terraform-azure-jenkins-master-HA/master/scripts/jenkinsInstall.sh"],
-          "commandToExecute": "sh jenkinsInstall.sh"
+		{
+			"ModulesUrl": "${var.config["asset_location"]}${var.config["prepare_bdc_script_path"]}",
+			"ConfigurationFunction": "${var.config["ad_bdc_prepare_function"]}\\PrepareADBDC",
+      "Properties": {
+          "DNSServer": "${var.config["pdc_nic_ip_address"]}"
+        }
+		}
+  SETTINGS
+}
+
+#Configure BDC: note that due to a limitation on VM Extensions (only one extension per VM), 
+# the name of this extension must be identical to the "prepare_bdc_extension" script
+resource "azurerm_virtual_machine_extension" "configure_bdc_extension" {
+  depends_on          = ["azurerm_virtual_machine_extension.prepare_bdc_extension"]
+  name                = "${format("%s-PrepareBDC", var.config["bdc_vm_name"])}"
+  resource_group_name = "${azurerm_resource_group.quickstartad.name}"
+  location            = "${azurerm_resource_group.quickstartad.location}"
+
+  virtual_machine_name       = "${azurerm_virtual_machine.bdc_virtual_machine.name}"
+  publisher                  = "Microsoft.Powershell"
+  type                       = "DSC"
+  type_handler_version       = "2.21"
+  auto_upgrade_minor_version = "true"
+
+  settings = <<SETTINGS
+		{
+			"ModulesUrl": "${var.config["asset_location"]}${var.config["configure_bdc_script_path"]}",
+			"ConfigurationFunction": "${var.config["ad_bdc_config_function"]}\\ConfigureADBDC",
+      "Properties": {
+        "DomainName": "${var.domain_name}",
+        "AdminCreds": {
+            "UserName": "${var.admin_username}",
+            "Password": "PrivateSettingsRef:AdminPassword"
+        }
       }
-SETTINGS
+		}
+  SETTINGS
+
+  protected_settings = <<SETTINGS
+    {
+      "Items": {
+        "AdminPassword": "${var.admin_password}"
+      }
+    }
+  SETTINGS
+}
+
+#Finally, add BDC DNS to vNet
+resource "azurerm_virtual_network" "adha_vnet_with_bdc_dns" {
+  depends_on          = ["azurerm_virtual_machine_extension.configure_bdc_extension"]
+  name                = "${var.config["vnet_name"]}"
+  resource_group_name = "${azurerm_resource_group.quickstartad.name}"
+  location            = "${azurerm_resource_group.quickstartad.location}"
+  address_space       = ["${var.config["vnet_address_range"]}"]
+  dns_servers         = ["${var.config["pdc_nic_ip_address"]}", "${var.config["bdc_nic_ip_address"]}"]
+
+  subnet {
+    name           = "${var.config["subnet_name"]}"
+    address_prefix = "${var.config["subnet_address_range"]}"
+  }
 }
 */
 

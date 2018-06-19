@@ -42,7 +42,7 @@ resource "azurerm_virtual_machine" "ad-primary-dc-pip-vm" {
   storage_image_reference {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
-    sku       = "2016-R2-Datacenter"
+    sku       = "2016-Datacenter"
     version   = "latest"
   }
   storage_os_disk {
@@ -59,27 +59,61 @@ resource "azurerm_virtual_machine" "ad-primary-dc-pip-vm" {
     admin_username = "DomainAdmin"
     admin_password = "Contoso!0000"
   }
-  os_profile_linux_config {
-    disable_password_authentication = false
+  os_profile_windows_config {
+    provision_vm_agent        = true
+    enable_automatic_upgrades = false
   }
 }
 
 /*
-resource "azurerm_virtual_machine_extension" "jenkins_master_primary_extension" {
-  name                 = "jenkins_master_primary_extension"
-  location             = "${azurerm_resource_group.res_group.location}"
-  resource_group_name  = "${azurerm_resource_group.res_group.name}"
-  virtual_machine_name = "${azurerm_virtual_machine.jenkins_master_primary_vm.name}"
-  publisher            = "Microsoft.OSTCExtensions"
-  type                 = "CustomScriptForLinux"
-  type_handler_version = "1.2"
+#Configure PDC
+resource "azurerm_virtual_machine_extension" "create_ad_forest_extension" {
+  name                = "${format("%s-CreateADForest", var.config["pdc_vm_name"])}"
+  resource_group_name = "${azurerm_resource_group.quickstartad.name}"
+  location            = "${azurerm_resource_group.quickstartad.location}"
+
+  virtual_machine_name       = "${azurerm_virtual_machine.pdc_virtual_machine.name}"
+  publisher                  = "Microsoft.Powershell"
+  type                       = "DSC"
+  type_handler_version       = "2.21"
+  auto_upgrade_minor_version = "true"
 
   settings = <<SETTINGS
-  {
-          "fileUris": ["https://raw.githubusercontent.com/corystein/terraform-azure-jenkins-master-HA/master/scripts/jenkinsInstall.sh"],
-          "commandToExecute": "sh jenkinsInstall.sh"
+		{
+			"ModulesUrl": "${var.config["asset_location"]}${var.config["create_pdc_script_path"]}",
+			"ConfigurationFunction": "${var.config["ad_pdc_config_function"]}\\CreateADPDC",
+      "Properties": {
+        "DomainName": "${var.domain_name}",
+        "AdminCreds": {
+            "UserName": "${var.admin_username}",
+            "Password": "PrivateSettingsRef:AdminPassword"
+        }
       }
-SETTINGS
+		}
+  SETTINGS
+
+  protected_settings = <<SETTINGS
+    {
+      "Items": {
+        "AdminPassword": "${var.admin_password}"
+      }
+    }
+  SETTINGS
+}
+
+#Update vNet with the new DNS Server once primary DC has been createad
+resource "azurerm_virtual_network" "adha_vnet_with_dns" {
+  depends_on          = ["azurerm_virtual_machine_extension.create_ad_forest_extension"]
+  name                = "${var.config["vnet_name"]}"
+  resource_group_name = "${azurerm_resource_group.quickstartad.name}"
+  location            = "${azurerm_resource_group.quickstartad.location}"
+  address_space       = ["${var.config["vnet_address_range"]}"]
+  dns_servers         = ["${var.config["pdc_nic_ip_address"]}"]
+
+  subnet {
+    name           = "${var.config["subnet_name"]}"
+    address_prefix = "${var.config["subnet_address_range"]}"
+  }
 }
 */
 
