@@ -26,3 +26,5 @@ Run following commands to run & test Terraform scripts :
 ## Links
 
 https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sql/virtual-machines-windows-portal-sql-availability-group-prereq
+
+https://github.pwc.com/craig-bourque/terraform-AD

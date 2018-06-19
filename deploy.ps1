@@ -48,8 +48,8 @@ function main() {
         # (Start) Capture duration metrics
         $BuildTime = [Diagnostics.Stopwatch]::StartNew()
 
-        [Environment]::SetEnvironmentVariable("ADAL_PYTHON_SSL_NO_VERIFY", "1", "Process")
-        [Environment]::SetEnvironmentVariable("AZURE_CLI_DISABLE_CONNECTION_VERIFICATION", "1", "Process")
+        [Environment]::SetEnvironmentVariable("ADAL_PYTHON_SSL_NO_VERIFY", "1", "User")
+        [Environment]::SetEnvironmentVariable("AZURE_CLI_DISABLE_CONNECTION_VERIFICATION", "1", "User")
 
         az login --service-principal -u "$($Env:client_id)" -p "$($Env:client_secret)" --tenant "$($Env:tenant_id)"
         if ($LASTEXITCODE -ne 0) { throw "Failure logging in to Azure"}
