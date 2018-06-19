@@ -1,12 +1,12 @@
-resource "azurerm_public_ip" "ad-secondary-dcpip" {
-  name                         = "ad-secondary-dcpip"
+resource "azurerm_public_ip" "cluster-fsw-pip" {
+  name                         = "cluster-fsw-pip"
   location                     = "${azurerm_resource_group.res_group.location}"
   resource_group_name          = "${azurerm_resource_group.res_group.name}"
   public_ip_address_allocation = "static"
 }
 
-resource "azurerm_network_interface" "ad-secondary-dcpip-nic" {
-  name                = "ad-secondary-dcpip-nic"
+resource "azurerm_network_interface" "cluster-fsw-nic" {
+  name                = "cluster-fsw-nic"
   resource_group_name = "${azurerm_resource_group.res_group.name}"
   location            = "${azurerm_resource_group.res_group.location}"
 
@@ -15,8 +15,8 @@ resource "azurerm_network_interface" "ad-secondary-dcpip-nic" {
 
     #private_ip_address_allocation = "static"
     private_ip_address_allocation           = "dynamic"
-    subnet_id                               = "${azurerm_subnet.subnet1.id}"
-    public_ip_address_id                    = "${azurerm_public_ip.ad-secondary-dcpip.id}"
+    subnet_id                               = "${azurerm_subnet.subnet2.id}"
+    public_ip_address_id                    = "${azurerm_public_ip.cluster-fsw-pip.id}"
     load_balancer_backend_address_pools_ids = ["${azurerm_lb_backend_address_pool.loadbalancer_backend.id}"]
 
     #load_balancer_inbound_nat_rules_ids     = ["${azurerm_lb_rule.lb_rule.id}"]
@@ -25,12 +25,12 @@ resource "azurerm_network_interface" "ad-secondary-dcpip-nic" {
   }
 }
 
-resource "azurerm_virtual_machine" "ad-secondary-dcpip-vm" {
-  name                  = "ad-secondary-dc"
+resource "azurerm_virtual_machine" "cluster-fsw-vm" {
+  name                  = "cluster-fsw"
   resource_group_name   = "${azurerm_resource_group.res_group.name}"
   location              = "${azurerm_resource_group.res_group.location}"
-  availability_set_id   = "${azurerm_availability_set.avail_set1.id}"
-  network_interface_ids = ["${azurerm_network_interface.ad-secondary-dcpip-nic.id}"]
+  availability_set_id   = "${azurerm_availability_set.avail_set2.id}"
+  network_interface_ids = ["${azurerm_network_interface.cluster-fsw-nic.id}"]
   vm_size               = "Standard_DS1_v2"
 
   # Uncomment this line to delete the OS disk automatically when deleting the VM
@@ -46,7 +46,7 @@ resource "azurerm_virtual_machine" "ad-secondary-dcpip-vm" {
     version   = "latest"
   }
   storage_os_disk {
-    name = "ad-secondary-dcosdisk"
+    name = "cluster-fswosdisk"
 
     #vhd_uri           = "${azurerm_storage_account.jenkins_storage.primary_blob_endpoint}${azurerm_storage_container.jenkins_cont.name}/osdisk-1.vhd"
     caching           = "ReadWrite"
@@ -55,7 +55,7 @@ resource "azurerm_virtual_machine" "ad-secondary-dcpip-vm" {
     disk_size_gb      = "128"
   }
   os_profile {
-    computer_name  = "ad-secondary-dc"
+    computer_name  = "cluster-fsw"
     admin_username = "DomainAdmin"
     admin_password = "Contoso!0000"
   }
