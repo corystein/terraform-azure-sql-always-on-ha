@@ -29,7 +29,7 @@ resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
   name                  = "ad-primary-dc"
   resource_group_name   = "${azurerm_resource_group.res_group.name}"
   location              = "${azurerm_resource_group.res_group.location}"
-  availability_set_id   = "${azurerm_availability_set.avail_set1.id}"
+  availability_set_id   = "${azurerm_availability_set.adavailabilityset.id}"
   network_interface_ids = ["${azurerm_network_interface.ad-primary-dc-nic.id}"]
   vm_size               = "Standard_DS1_v2"
 
@@ -82,10 +82,10 @@ resource "azurerm_virtual_machine_extension" "create_ad_forest_extension" {
 			"ModulesUrl": "${var.config["asset_location"]}${var.config["create_pdc_script_path"]}",
 			"ConfigurationFunction": "${var.config["ad_pdc_config_function"]}\\CreateADPDC",
       "Properties": {
-        "DomainName": "${var.domain_name}",
+        "DomainName": "${var.config["domain_name"]}",
         "AdminCreds": {
-            "UserName": "${var.admin_username}",
-            "Password": "PrivateSettingsRef:AdminPassword"
+            "UserName": "${var.config["admin_username"]}",
+            "Password": "PrivateSettingsRef:${var.config["admin_username"]}"
         }
       }
 		}
@@ -95,7 +95,7 @@ resource "azurerm_virtual_machine_extension" "create_ad_forest_extension" {
   protected_settings = <<SETTINGS
     {
       "Items": {
-        "AdminPassword": "${var.admin_password}"
+        "AdminPassword": "${var.config["admin_password"]}"
       }
     }
   SETTINGS

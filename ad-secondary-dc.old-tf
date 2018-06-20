@@ -29,7 +29,7 @@ resource "azurerm_virtual_machine" "ad-secondary-dc-vm" {
   name                  = "ad-secondary-dc"
   resource_group_name   = "${azurerm_resource_group.res_group.name}"
   location              = "${azurerm_resource_group.res_group.location}"
-  availability_set_id   = "${azurerm_availability_set.avail_set1.id}"
+  availability_set_id   = "${azurerm_availability_set.adavailabilityset.id}"
   network_interface_ids = ["${azurerm_network_interface.ad-secondary-dc-nic.id}"]
   vm_size               = "Standard_DS1_v2"
 

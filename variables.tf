@@ -26,19 +26,23 @@ variable "config" {
     "network_public_ipaddress_type" = "static"
 
     # Storage Account settings
-    "storage_account_name" = "teststgactjen001"
-    "container_name"       = "vhds"
-    "share_name"           = "hashare"
+    #"storage_account_name" = "teststgactjen001"
+    "container_name" = "scripts"
+
+    #"share_name"           = "hashare"
 
     # Load Balancer settings
     "lb_pip_name"    = "lb-pip"
     "lb_ip_dns_name" = ""
 
     # Availablity Set settings
-    "avail_set1_name" = "adavailabilityset"
-    "avail_set2_name" = "sqlavailabilityset"
+    #"avail_set1_name" = "adavailabilityset"
+    #"avail_set2_name" = "sqlavailabilityset"
 
     # AD Setup Scripts
+    "domain_name"               = "corp.contoso.com"
+    "admin_username"            = "domainadmin"
+    "admin_password"            = "Contoso!0000"
     "asset_location"            = "https://demotest001.blob.core.windows.net/activedirectory"
     "create_pdc_script_path"    = "/CreateADPDC.zip"
     "prepare_bdc_script_path"   = "/PrepareADBDC.zip"
