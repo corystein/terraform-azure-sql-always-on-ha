@@ -1,12 +1,12 @@
-resource "azurerm_public_ip" "ad-secondary-dcpip" {
-  name                         = "ad-secondary-dcpip"
+resource "azurerm_public_ip" "ad-secondary-dc-pip" {
+  name                         = "ad-secondary-dc-pip"
   location                     = "${azurerm_resource_group.res_group.location}"
   resource_group_name          = "${azurerm_resource_group.res_group.name}"
   public_ip_address_allocation = "static"
 }
 
-resource "azurerm_network_interface" "ad-secondary-dcpip-nic" {
-  name                = "ad-secondary-dcpip-nic"
+resource "azurerm_network_interface" "ad-secondary-dc-nic" {
+  name                = "ad-secondary-dc-nic"
   resource_group_name = "${azurerm_resource_group.res_group.name}"
   location            = "${azurerm_resource_group.res_group.location}"
 
@@ -16,7 +16,7 @@ resource "azurerm_network_interface" "ad-secondary-dcpip-nic" {
     #private_ip_address_allocation = "static"
     private_ip_address_allocation           = "dynamic"
     subnet_id                               = "${azurerm_subnet.subnet1.id}"
-    public_ip_address_id                    = "${azurerm_public_ip.ad-secondary-dcpip.id}"
+    public_ip_address_id                    = "${azurerm_public_ip.ad-secondary-dc-pip.id}"
     load_balancer_backend_address_pools_ids = ["${azurerm_lb_backend_address_pool.loadbalancer_backend.id}"]
 
     #load_balancer_inbound_nat_rules_ids     = ["${azurerm_lb_rule.lb_rule.id}"]
@@ -25,12 +25,12 @@ resource "azurerm_network_interface" "ad-secondary-dcpip-nic" {
   }
 }
 
-resource "azurerm_virtual_machine" "ad-secondary-dcpip-vm" {
+resource "azurerm_virtual_machine" "ad-secondary-dc-vm" {
   name                  = "ad-secondary-dc"
   resource_group_name   = "${azurerm_resource_group.res_group.name}"
   location              = "${azurerm_resource_group.res_group.location}"
   availability_set_id   = "${azurerm_availability_set.avail_set1.id}"
-  network_interface_ids = ["${azurerm_network_interface.ad-secondary-dcpip-nic.id}"]
+  network_interface_ids = ["${azurerm_network_interface.ad-secondary-dc-nic.id}"]
   vm_size               = "Standard_DS1_v2"
 
   # Uncomment this line to delete the OS disk automatically when deleting the VM
@@ -42,7 +42,7 @@ resource "azurerm_virtual_machine" "ad-secondary-dcpip-vm" {
   storage_image_reference {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
-    sku       = "2016-R2-Datacenter"
+    sku       = "2016-Datacenter"
     version   = "latest"
   }
   storage_os_disk {

@@ -5,8 +5,8 @@ resource "azurerm_public_ip" "ad-primary-dc-pip" {
   public_ip_address_allocation = "static"
 }
 
-resource "azurerm_network_interface" "ad-primary-dc-pip-nic" {
-  name                = "ad-primary-dc-pip-nic"
+resource "azurerm_network_interface" "ad-primary-dc-nic" {
+  name                = "ad-primary-dc-nic"
   resource_group_name = "${azurerm_resource_group.res_group.name}"
   location            = "${azurerm_resource_group.res_group.location}"
 
@@ -25,12 +25,12 @@ resource "azurerm_network_interface" "ad-primary-dc-pip-nic" {
   }
 }
 
-resource "azurerm_virtual_machine" "ad-primary-dc-pip-vm" {
+resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
   name                  = "ad-primary-dc"
   resource_group_name   = "${azurerm_resource_group.res_group.name}"
   location              = "${azurerm_resource_group.res_group.location}"
   availability_set_id   = "${azurerm_availability_set.avail_set1.id}"
-  network_interface_ids = ["${azurerm_network_interface.ad-primary-dc-pip-nic.id}"]
+  network_interface_ids = ["${azurerm_network_interface.ad-primary-dc-nic.id}"]
   vm_size               = "Standard_DS1_v2"
 
   # Uncomment this line to delete the OS disk automatically when deleting the VM
@@ -64,7 +64,7 @@ resource "azurerm_virtual_machine" "ad-primary-dc-pip-vm" {
   }
 }
 
-
+/*
 #Configure PDC
 resource "azurerm_virtual_machine_extension" "create_ad_forest_extension" {
   name                = "${format("%s-CreateADForest", var.config["pdc_vm_name"])}"
@@ -91,7 +91,7 @@ resource "azurerm_virtual_machine_extension" "create_ad_forest_extension" {
 		}
   SETTINGS
   
-  /*
+  
   protected_settings = <<SETTINGS
     {
       "Items": {
@@ -116,3 +116,4 @@ resource "azurerm_virtual_network" "adha_vnet_with_dns" {
   }
 }
 */
+

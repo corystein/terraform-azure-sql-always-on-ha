@@ -26,10 +26,11 @@ resource "azurerm_network_interface" "cluster-fsw-nic" {
 }
 
 resource "azurerm_virtual_machine" "cluster-fsw-vm" {
-  name                  = "cluster-fsw"
-  resource_group_name   = "${azurerm_resource_group.res_group.name}"
-  location              = "${azurerm_resource_group.res_group.location}"
-  availability_set_id   = "${azurerm_availability_set.avail_set2.id}"
+  name                = "cluster-fsw"
+  resource_group_name = "${azurerm_resource_group.res_group.name}"
+  location            = "${azurerm_resource_group.res_group.location}"
+
+  #availability_set_id   = "${azurerm_availability_set.avail_set2.id}"
   network_interface_ids = ["${azurerm_network_interface.cluster-fsw-nic.id}"]
   vm_size               = "Standard_DS1_v2"
 
@@ -42,7 +43,7 @@ resource "azurerm_virtual_machine" "cluster-fsw-vm" {
   storage_image_reference {
     publisher = "MicrosoftWindowsServer"
     offer     = "WindowsServer"
-    sku       = "2016-R2-Datacenter"
+    sku       = "2016-Datacenter"
     version   = "latest"
   }
   storage_os_disk {
