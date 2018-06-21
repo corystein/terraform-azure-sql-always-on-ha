@@ -28,3 +28,7 @@ Run following commands to run & test Terraform scripts :
 https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sql/virtual-machines-windows-portal-sql-availability-group-prereq
 
 https://github.pwc.com/craig-bourque/terraform-AD
+
+https://github.com/terraform-providers/terraform-provider-azurerm/blob/master/examples/vm-joined-to-active-directory/modules/active-directory/2-virtual-machine.tf
+
+https://github.com/bobalob/Terraform-AzureRM-Example/blob/winrm-https/testvm.tf

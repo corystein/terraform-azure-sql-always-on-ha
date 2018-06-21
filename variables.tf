@@ -50,6 +50,15 @@ variable "config" {
     "ad_pdc_config_function"    = "CreateADPDC.ps1"
     "ad_bdc_prepare_function"   = "PrepareADBDC.ps1"
     "ad_bdc_config_function"    = "ConfigureADBDC.ps1"
+    ######################################
+    # Virtual Machine settings
+    ######################################
+    # AD Primary
+    "ad_primary_dc_vmname" = "ad-primary-dc"
+
+    ######################################
+
+    "vm_winrm_port" = "5986"
 
     /*
     # Virtual Machine settings
@@ -70,4 +79,25 @@ variable "config" {
     "vm_password"                         = "P@ssword12345"
     */
   }
+}
+
+variable "azure_region" {
+  description = "Azure Region for all resources"
+  default     = "eastus"
+}
+
+variable "azure_dns_suffix" {
+  description = "Azure DNS suffix for the Public IP"
+  default     = "cloudapp.azure.com"
+}
+
+#Null resource to make the VM intermediate varable - probably not the right way to do this
+resource "null_resource" "intermediates" {
+  triggers = {
+    full_vm_dns_name = "${var.config["ad_primary_dc_vmname"]}.${var.azure_region}.${var.azure_dns_suffix}"
+  }
+}
+
+output "full_vm_dns_name" {
+  value = "${null_resource.intermediates.triggers.full_vm_dns_name}"
 }

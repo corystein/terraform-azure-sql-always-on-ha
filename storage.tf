@@ -1,5 +1,5 @@
 /* This terraform configuration creates storage account on Azure & creates a container for storing virtual machine HD image */
-
+/*
 resource "random_id" "storage_account" {
   byte_length = 8
 }
@@ -28,3 +28,5 @@ resource "azurerm_storage_blob" "blobobject" {
   storage_container_name = "${azurerm_storage_container.storage_container.name}"
   source                 = "./scripts/*"
 }
+*/
+
