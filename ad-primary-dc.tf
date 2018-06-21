@@ -101,6 +101,7 @@ resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
     source      = "./scripts/*"
     destination = "c:/scripts"
 
+    /*
     connection {
       type     = "winrm"
       user     = "${var.config["admin_username"]}"
@@ -110,6 +111,7 @@ resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
       host     = "${null_resource.intermediates.triggers.full_vm_dns_name}"
       port     = "${var.config["vm_winrm_port"]}"
     }
+    */
   }
 }
 

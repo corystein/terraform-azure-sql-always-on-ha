@@ -6,14 +6,15 @@ resource "azurerm_public_ip" "loadbalancer_pip" {
   #public_ip_address_allocation = "dynamic"
 
   public_ip_address_allocation = "static"
-
   #domain_name_label            = "${var.config["lb_ip_dns_name"]}"
+  sku = "Standard"
 }
 
 resource "azurerm_lb" "loadbalancer" {
   name                = "loadbalancer"
   resource_group_name = "${azurerm_resource_group.res_group.name}"
   location            = "${azurerm_resource_group.res_group.location}"
+  sku                 = "Standard"
 
   frontend_ip_configuration {
     name                 = "loadbalancer_frontend"
