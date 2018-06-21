@@ -74,8 +74,10 @@ resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
     admin_password = "${var.config["admin_password"]}"
 
     #custom_data    = "${file("${path.module}/files/winrm.ps1")}"
+    custom_data = "${file("${path.module}/files/EnableWinRM.ps1")}"
+
     #Include Deploy.PS1 with variables injected as custom_data
-    custom_data = "${base64encode("Param($RemoteHostName = \"${null_resource.intermediates.triggers.full_vm_dns_name}\", $ComputerName = \"${var.config["ad_primary_dc_vmname"]}\", $WinRmPort = ${var.config["vm_winrm_port"]}) ${file("${path.module}/files/Deploy.ps1")}")}"
+    #custom_data = "${base64encode("Param($RemoteHostName = \"${null_resource.intermediates.triggers.full_vm_dns_name}\", $ComputerName = \"${var.config["ad_primary_dc_vmname"]}\", $WinRmPort = ${var.config["vm_winrm_port"]}) ${file("${path.module}/files/Deploy.ps1")}")}"
   }
   os_profile_windows_config {
     provision_vm_agent        = true
@@ -96,23 +98,25 @@ resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
       content      = "${file("${path.module}/files/FirstLogonCommands.xml")}"
     }
   }
-  # Copies the file as the root user using SSH
-  provisioner "file" {
-    source      = "./scripts/*"
-    destination = "c:/scripts"
+}
 
-    /*
+resource "null_resource" "remote-exec-ad-primary-dc" {
+  provisioner "file" {
     connection {
       type     = "winrm"
+      https    = false
+      insecure = true
+      port     = "5985"
+      host     = "${azurerm_public_ip.ad-primary-dc-pip.ip_address}"
       user     = "${var.config["admin_username"]}"
       password = "${var.config["admin_password"]}"
-      https    = true
-      insecure = true
-      host     = "${null_resource.intermediates.triggers.full_vm_dns_name}"
-      port     = "${var.config["vm_winrm_port"]}"
     }
-    */
+
+    source      = "./scripts/*"
+    destination = "c:/scripts"
   }
+
+  depends_on = ["azurerm_virtual_machine.ad-primary-dc-vm"]
 }
 
 /*
