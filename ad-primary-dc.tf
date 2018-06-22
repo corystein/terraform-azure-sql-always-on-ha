@@ -3,12 +3,12 @@ resource "azurerm_public_ip" "ad-primary-dc-pip" {
   location            = "${azurerm_resource_group.res_group.location}"
   resource_group_name = "${azurerm_resource_group.res_group.name}"
 
-  public_ip_address_allocation = "static"
+  #public_ip_address_allocation = "static"
 
-  #public_ip_address_allocation = "dynamic"
-  domain_name_label = "${var.config["ad_primary_dc_vmname"]}"
+  public_ip_address_allocation = "dynamic"
+  domain_name_label            = "${var.config["ad_primary_dc_vmname"]}"
 
-  sku = "Standard"
+  #sku                          = "Standard"
 }
 
 resource "azurerm_network_interface" "ad-primary-dc-nic" {
@@ -20,10 +20,11 @@ resource "azurerm_network_interface" "ad-primary-dc-nic" {
     name = "ipconfig1"
 
     #private_ip_address_allocation = "static"
-    private_ip_address_allocation           = "dynamic"
-    subnet_id                               = "${azurerm_subnet.subnet1.id}"
-    public_ip_address_id                    = "${azurerm_public_ip.ad-primary-dc-pip.id}"
-    load_balancer_backend_address_pools_ids = ["${azurerm_lb_backend_address_pool.loadbalancer_backend.id}"]
+    private_ip_address_allocation = "dynamic"
+    subnet_id                     = "${azurerm_subnet.subnet1.id}"
+    public_ip_address_id          = "${azurerm_public_ip.ad-primary-dc-pip.id}"
+
+    #load_balancer_backend_address_pools_ids = ["${azurerm_lb_backend_address_pool.loadbalancer_backend.id}"]
 
     #load_balancer_inbound_nat_rules_ids     = ["${azurerm_lb_rule.lb_rule.id}"]
 
@@ -41,10 +42,11 @@ locals {
 */
 
 resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
-  name                  = "ad-primary-dc"
-  resource_group_name   = "${azurerm_resource_group.res_group.name}"
-  location              = "${azurerm_resource_group.res_group.location}"
-  availability_set_id   = "${azurerm_availability_set.adavailabilityset.id}"
+  name                = "ad-primary-dc"
+  resource_group_name = "${azurerm_resource_group.res_group.name}"
+  location            = "${azurerm_resource_group.res_group.location}"
+
+  #availability_set_id   = "${azurerm_availability_set.adavailabilityset.id}"
   network_interface_ids = ["${azurerm_network_interface.ad-primary-dc-nic.id}"]
   vm_size               = "Standard_DS1_v2"
 
@@ -74,7 +76,7 @@ resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
     admin_password = "${var.config["admin_password"]}"
 
     #custom_data    = "${file("${path.module}/files/winrm.ps1")}"
-    custom_data = "${file("${path.module}/files/EnableWinRM.ps1")}"
+    #custom_data = "${base64encode(file("${path.module}/files/EnableWinRM.ps1"))}"
 
     #Include Deploy.PS1 with variables injected as custom_data
     #custom_data = "${base64encode("Param($RemoteHostName = \"${null_resource.intermediates.triggers.full_vm_dns_name}\", $ComputerName = \"${var.config["ad_primary_dc_vmname"]}\", $WinRmPort = ${var.config["vm_winrm_port"]}) ${file("${path.module}/files/Deploy.ps1")}")}"
@@ -103,17 +105,26 @@ resource "azurerm_virtual_machine" "ad-primary-dc-vm" {
 resource "null_resource" "remote-exec-ad-primary-dc" {
   provisioner "file" {
     connection {
-      type     = "winrm"
-      https    = false
-      insecure = true
-      port     = "5985"
-      host     = "${azurerm_public_ip.ad-primary-dc-pip.ip_address}"
+      type = "winrm"
+
+      #https    = false
+      #insecure = true
+      #port = "5985"
+      host = "${azurerm_public_ip.ad-primary-dc-pip.fqdn}"
+
       user     = "${var.config["admin_username"]}"
       password = "${var.config["admin_password"]}"
+      timeout  = "30s"
     }
 
-    source      = "./scripts/*"
+    source      = "./scripts/"
     destination = "c:/scripts"
+  }
+
+  provisioner "local-exec" {
+    command     = "Get-Date > completed.txt"
+    interpreter = ["PowerShell", "-Command"]
+    working_dir = "c:/scripts/ad"
   }
 
   depends_on = ["azurerm_virtual_machine.ad-primary-dc-vm"]

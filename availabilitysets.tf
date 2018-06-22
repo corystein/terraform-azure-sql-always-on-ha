@@ -1,3 +1,4 @@
+/*
 resource "azurerm_availability_set" "adavailabilityset" {
   name                         = "adavailabilityset"
   resource_group_name          = "${azurerm_resource_group.res_group.name}"
@@ -15,3 +16,5 @@ resource "azurerm_availability_set" "sqlAvailabilitySet" {
   platform_update_domain_count = 3
   managed                      = true
 }
+*/
+

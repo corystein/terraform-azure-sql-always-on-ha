@@ -1,3 +1,4 @@
+/*
 resource "azurerm_public_ip" "loadbalancer_pip" {
   name                = "${var.config["lb_pip_name"]}"
   resource_group_name = "${azurerm_resource_group.res_group.name}"
@@ -37,7 +38,7 @@ resource "azurerm_lb_probe" "loadbalancer_probe" {
   interval_in_seconds = 5
   number_of_probes    = 2
 }
-
+*/
 /*
 resource "azurerm_lb_rule" "lb_http_rule" {
   resource_group_name            = "${azurerm_resource_group.res_group.name}"
